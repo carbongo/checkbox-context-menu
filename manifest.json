@@ -1,0 +1,10 @@
+{
+  "id": "checkbox-context-menu",
+  "name": "Checkbox Context Menu",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "Right-click context menu to toggle checkbox states",
+  "author": "carbongo",
+  "authorUrl": "https://github.com/carbongo",
+  "isDesktopOnly": false
+}
