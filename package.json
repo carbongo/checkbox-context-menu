@@ -21,7 +21,7 @@
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
     "@types/codemirror": "^5.60.7",
-    "esbuild": "^0.19.0",
+    "esbuild": "^0.28.1",
     "obsidian": "^1.13.1",
     "typescript": "^5.0.0",
     "vitest": "^4.1.10"

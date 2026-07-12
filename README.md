@@ -1,5 +1,7 @@
 # Checkbox Context Menu
 
+![screenshot](https://raw.githubusercontent.com/carbongo/checkbox-context-menu/main/screenshot.png)
+
 Obsidian plugin that adds a right-click **context menu** to any task checkbox for
 switching between states — unchecked, done, half-done, deferred, scheduled,
 important, cancelled, and any custom states you define.
@@ -25,7 +27,7 @@ your theme and light/dark mode. See `docs/status-styles.md`.
 ## Development
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 npm run dev
 ```
 

@@ -58,7 +58,7 @@ body.checkbox-context-menu-styles .task-list-item:is(
     text-align: center !important;
     /* Nudge the glyph a hair left — several of these characters carry a
        right-heavy side bearing that reads as off-centre otherwise. */
-    transform: translateX(-1px) !important;
+    transform: translate3d(-2px, -2px, 0) !important;
     /* Cancel any theme checkmark mask so only our glyph shows. */
     background: none !important;
     -webkit-mask-image: none !important;
