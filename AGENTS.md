@@ -22,3 +22,4 @@ npm test
 - `reading-mode.md` — how the context menu works in editing vs. reading (preview) mode, including mobile long-press.
 - `unchecked-char-fix.md` — why the unchecked state uses `" "` (not `""`) and the settings migration.
 - `status-styles.md` — the `styles.css` per-status styling and how it hooks the `data-task` attribute.
+- `obsidian-marketplace.md` — how to publish/update on the Obsidian marketplace.
