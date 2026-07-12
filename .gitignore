@@ -1,6 +1,7 @@
 node_modules/
-*.js
 dist/
 .DS_Store
 settings.json
 data.json
+main.js
+styles.css
