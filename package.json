@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -b && node esbuild.config.mjs",
     "dev": "node esbuild.config.mjs --watch",
-    "lint": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' manifest.json styles.css",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -20,8 +20,12 @@
   "devDependencies": {
     "@codemirror/state": "^6.0.0",
     "@codemirror/view": "^6.0.0",
+    "@eslint/css": "^1.4.0",
     "@types/codemirror": "^5.60.7",
+    "@typescript-eslint/parser": "^8.64.0",
     "esbuild": "^0.28.1",
+    "eslint": "^10.7.0",
+    "eslint-plugin-obsidianmd": "^0.4.1",
     "obsidian": "^1.13.1",
     "typescript": "^5.0.0",
     "vitest": "^4.1.10"
