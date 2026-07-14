@@ -61,7 +61,7 @@ describe('getActiveStates — stateOverrides', () => {
     });
     const result = getActiveStates(settings);
     const done = result.find(s => s.char === 'x');
-    expect(done!.label).toBe('Completed');
+    expect(done.label).toBe('Completed');
   });
 
   it('applies icon override for a state', () => {
@@ -70,7 +70,7 @@ describe('getActiveStates — stateOverrides', () => {
     });
     const result = getActiveStates(settings);
     const important = result.find(s => s.char === '!');
-    expect(important!.icon).toBe('🔥');
+    expect(important.icon).toBe('🔥');
   });
 
   it('applies both label and icon override together', () => {
@@ -79,8 +79,8 @@ describe('getActiveStates — stateOverrides', () => {
     });
     const result = getActiveStates(settings);
     const half = result.find(s => s.char === '/');
-    expect(half!.label).toBe('In Progress');
-    expect(half!.icon).toBe('⏳');
+    expect(half.label).toBe('In Progress');
+    expect(half.icon).toBe('⏳');
   });
 
   it('does not mutate states that have no override', () => {
@@ -89,7 +89,7 @@ describe('getActiveStates — stateOverrides', () => {
     });
     const result = getActiveStates(settings);
     const unchecked = result.find(s => s.char === UNCHECKED_CHAR);
-    expect(unchecked!.label).toBe('Unchecked'); // original label preserved
+    expect(unchecked.label).toBe('Unchecked'); // original label preserved
   });
 });
 
@@ -149,7 +149,7 @@ describe('getActiveStates — customStates', () => {
     const result = getActiveStates(settings);
     const found = result.find(s => s.char === '?');
     expect(found).toBeDefined();
-    expect(found!.label).toBe('Maybe');
+    expect(found.label).toBe('Maybe');
   });
 
   it('excludes custom states that are not in enabledStates', () => {
@@ -171,6 +171,6 @@ describe('getActiveStates — customStates', () => {
     });
     const result = getActiveStates(settings);
     const found = result.find(s => s.char === '@');
-    expect(found!.label).toBe('Mention');
+    expect(found.label).toBe('Mention');
   });
 });

@@ -16,7 +16,7 @@ export default class CheckboxContextMenuPlugin extends Plugin {
 
         this.applyStatusStyles();
         // Ensure the body class never lingers if the plugin is disabled.
-        this.register(() => document.body.classList.remove(STATUS_STYLES_CLASS));
+        this.register(() => activeDocument.body.classList.remove(STATUS_STYLES_CLASS));
 
         const tab = new CheckboxPluginSettingTab(this.app, this);
         tab.setPlugin(this);
@@ -83,7 +83,7 @@ export default class CheckboxContextMenuPlugin extends Plugin {
         });
     }
 
-    async onunload() {
+    onunload(): void {
         // Cleanup is handled by register* methods
     }
 
@@ -93,11 +93,12 @@ export default class CheckboxContextMenuPlugin extends Plugin {
      * whenever the setting changes.
      */
     applyStatusStyles(): void {
-        document.body.classList.toggle(STATUS_STYLES_CLASS, this.settings.injectStatusStyles);
+        activeDocument.body.classList.toggle(STATUS_STYLES_CLASS, this.settings.injectStatusStyles);
     }
 
     async loadSettings() {
-        const loaded = await this.loadData();
+        const raw: unknown = await this.loadData();
+        const loaded = (raw != null && typeof raw === 'object') ? (raw as Partial<CheckboxPluginSettings>) : null;
         this.settings = { ...DEFAULT_SETTINGS };
 
         if (loaded) {

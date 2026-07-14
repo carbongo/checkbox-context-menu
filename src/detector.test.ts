@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isTaskLine, TASK_LINE, findCheckboxOnLine } from './detector';
+import { isTaskLine, findCheckboxOnLine } from './detector';
 
 // ---------------------------------------------------------------------------
 // TASK_LINE / isTaskLine
@@ -73,14 +73,14 @@ describe('findCheckboxOnLine', () => {
   it('returns the first checkbox when no cursorOffset is provided', () => {
     const result = findCheckboxOnLine('- [x] task');
     expect(result).not.toBeNull();
-    expect(result!.currentState).toBe('[x]');
-    expect(result!.startPos).toBe(2);
+    expect(result.currentState).toBe('[x]');
+    expect(result.startPos).toBe(2);
   });
 
   it('returns the first checkbox when no cursorOffset and multiple exist', () => {
     const line = '[x] first [/] second';
     const result = findCheckboxOnLine(line);
-    expect(result!.currentState).toBe('[x]');
+    expect(result.currentState).toBe('[x]');
   });
 
   it('returns the closest checkbox to the cursor offset — near first checkbox', () => {
@@ -90,14 +90,14 @@ describe('findCheckboxOnLine', () => {
     const line = '[x] hello [/] world';
     // Cursor at col 1 — very close to [x]
     const result = findCheckboxOnLine(line, 1);
-    expect(result!.currentState).toBe('[x]');
+    expect(result.currentState).toBe('[x]');
   });
 
   it('returns the closest checkbox to the cursor offset — near second checkbox', () => {
     const line = '[x] hello [/] world';
     // Cursor at col 11 — inside [/]
     const result = findCheckboxOnLine(line, 11);
-    expect(result!.currentState).toBe('[/]');
+    expect(result.currentState).toBe('[/]');
   });
 
   it('when cursor is equidistant, returns whichever is measured closer by the dist formula', () => {
@@ -105,9 +105,9 @@ describe('findCheckboxOnLine', () => {
     // Midpoint between endPos of [x] (3) and startPos of [/] (4) is 3.5
     // At offset 3: dist to [x] = min(|0-3|,|3-3|)=0, dist to [/]=min(|4-3|,|7-3|)=1 → [x] wins
     const line = '[x] [/]';
-    expect(findCheckboxOnLine(line, 3)!.currentState).toBe('[x]');
+    expect(findCheckboxOnLine(line, 3).currentState).toBe('[x]');
     // At offset 4: dist to [x]=min(4,1)=1, dist to [/]=min(0,3)=0 → [/] wins
-    expect(findCheckboxOnLine(line, 4)!.currentState).toBe('[/]');
+    expect(findCheckboxOnLine(line, 4).currentState).toBe('[/]');
   });
 
   it('returns correct position metadata', () => {

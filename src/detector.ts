@@ -3,7 +3,7 @@
  */
 
 import { Editor } from 'obsidian';
-import { findCheckboxes, CHECKBOX_REGEX } from './utils';
+import { findCheckboxes } from './utils';
 
 /**
  * A markdown line that renders as a task: a list marker (`-`, `*`, `+`, or an

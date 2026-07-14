@@ -60,14 +60,14 @@ function attachLongPressHandler(
   element: HTMLElement,
   context: MarkdownPostProcessorContext,
 ): void {
-  let timerId: ReturnType<typeof setTimeout> | null = null;
+  let timerId: number | null = null;
   let startX = 0;
   let startY = 0;
   let startEvent: TouchEvent | null = null;
 
   function cancel(): void {
     if (timerId !== null) {
-      clearTimeout(timerId);
+      window.clearTimeout(timerId);
       timerId = null;
     }
     startEvent = null;
@@ -81,7 +81,7 @@ function attachLongPressHandler(
     startY = touch.clientY;
     startEvent = evt;
 
-    timerId = setTimeout(() => {
+    timerId = window.setTimeout(() => {
       timerId = null;
       if (startEvent) {
         // Suppress text-selection callout / native context menu on the long press.
