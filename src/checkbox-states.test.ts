@@ -5,6 +5,8 @@ import {
   DEFAULT_STATES,
   UNCHECKED_CHAR,
   CheckboxPluginSettings,
+  normalizeStateOrder,
+  getOrderedStates,
 } from './checkbox-states';
 
 // Helper: build a settings object from DEFAULT_SETTINGS with overrides.
@@ -172,5 +174,51 @@ describe('getActiveStates — customStates', () => {
     const result = getActiveStates(settings);
     const found = result.find(s => s.char === '@');
     expect(found.label).toBe('Mention');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// stateOrder — drag-and-drop menu ordering
+// ---------------------------------------------------------------------------
+
+describe('stateOrder', () => {
+  it('getActiveStates follows a custom stateOrder', () => {
+    const settings = makeSettings({
+      stateOrder: ['x', '!', UNCHECKED_CHAR, '/', '>', '<', '-'],
+    });
+    const chars = getActiveStates(settings).map(s => s.char);
+    expect(chars).toEqual(['x', '!', UNCHECKED_CHAR, '/', '>', '<', '-']);
+  });
+
+  it('sortAlphabetically overrides stateOrder', () => {
+    const settings = makeSettings({
+      stateOrder: ['x', '!', UNCHECKED_CHAR, '/', '>', '<', '-'],
+      sortAlphabetically: true,
+    });
+    const chars = getActiveStates(settings).map(s => s.char);
+    expect(chars[0]).toBe(UNCHECKED_CHAR);
+  });
+
+  it('normalizeStateOrder appends states missing from the order', () => {
+    const settings = makeSettings({
+      customStates: [{ char: '?', label: 'Maybe' }],
+      stateOrder: ['x', UNCHECKED_CHAR],
+    });
+    const order = normalizeStateOrder(settings);
+    expect(order.slice(0, 2)).toEqual(['x', UNCHECKED_CHAR]);
+    expect(order).toContain('?');
+    expect(order).toHaveLength(DEFAULT_STATES.length + 1);
+  });
+
+  it('normalizeStateOrder drops chars of removed states', () => {
+    const settings = makeSettings({
+      stateOrder: ['zombie', ...DEFAULT_STATES.map(s => s.char)],
+    });
+    expect(normalizeStateOrder(settings)).not.toContain('zombie');
+  });
+
+  it('getOrderedStates includes disabled states (settings list shows all)', () => {
+    const settings = makeSettings({ enabledStates: ['x'] });
+    expect(getOrderedStates(settings)).toHaveLength(DEFAULT_STATES.length);
   });
 });

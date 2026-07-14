@@ -1,6 +1,6 @@
 import type { Plugin } from 'obsidian';
 import { PluginSettingTab, Setting, Notice } from 'obsidian';
-import { CheckboxState, CheckboxPluginSettings, DEFAULT_STATES, UNCHECKED_CHAR } from './checkbox-states';
+import { CheckboxState, CheckboxPluginSettings, DEFAULT_STATES, UNCHECKED_CHAR, getOrderedStates, normalizeStateOrder } from './checkbox-states';
 
 /** Human-readable description of the markdown a state char renders as. */
 function describeChar(char: string): string {
@@ -90,94 +90,152 @@ export class CheckboxPluginSettingTab extends PluginSettingTab {
     addCheckboxStatesSection(containerEl: HTMLElement, settings: CheckboxPluginSettings): void {
         new Setting(containerEl)
             .setName('Checkbox states')
-            .setDesc('Enable or disable each built-in checkbox state. You can also override its label and icon.')
+            .setDesc(
+                'Enable or disable each checkbox state and override its label and icon. ' +
+                'Drag the ⠿ handle to reorder the context menu (ignored while ' +
+                'alphabetical sort is on).',
+            )
             .setHeading();
 
-        DEFAULT_STATES.forEach((state) => {
-            const isEnabled = settings.enabledStates.includes(state.char);
-            const override = settings.stateOverrides[state.char] ?? {};
+        const listEl = containerEl.createDiv({ cls: 'checkbox-context-menu-state-list' });
 
-            const setting = new Setting(containerEl)
-                .setName(`${state.icon} ${this.getResolvedLabel(state, settings)}`)
-                .setDesc(`Renders as: ${describeChar(state.char)}`);
-
-            setting.addToggle((toggle) => toggle
-                .setValue(isEnabled)
-                .onChange(async (value: boolean) => {
-                    if (value) {
-                        if (!settings.enabledStates.includes(state.char)) {
-                            settings.enabledStates = [...settings.enabledStates, state.char];
-                        }
-                    } else {
-                        settings.enabledStates = settings.enabledStates.filter((c: string) => c !== state.char);
-                    }
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-
-            setting.addText((text) => text
-                .setPlaceholder('Custom label')
-                .setValue(override.label ?? '')
-                .onChange(async (value: string) => {
-                    settings.stateOverrides[state.char] = {
-                        ...(settings.stateOverrides[state.char] ?? {}),
-                        label: value || undefined,
-                        icon: settings.stateOverrides[state.char]?.icon,
-                    };
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-
-            setting.addText((text) => text
-                .setPlaceholder('Custom icon')
-                .setValue(override.icon ?? '')
-                .onChange(async (value: string) => {
-                    settings.stateOverrides[state.char] = {
-                        ...(settings.stateOverrides[state.char] ?? {}),
-                        label: settings.stateOverrides[state.char]?.label,
-                        icon: value || undefined,
-                    };
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
+        getOrderedStates(settings).forEach((state) => {
+            this.addStateRow(listEl, settings, state);
         });
+    }
+
+    private addStateRow(listEl: HTMLElement, settings: CheckboxPluginSettings, state: CheckboxState): void {
+        const isEnabled = settings.enabledStates.includes(state.char);
+        const isCustom = !DEFAULT_STATES.some((s) => s.char === state.char);
+        const override = settings.stateOverrides[state.char] ?? {};
+
+        const setting = new Setting(listEl)
+            .setDesc(`Renders as: ${describeChar(state.char)}`);
+        setting.settingEl.dataset.stateChar = state.char;
+
+        // Re-render the row's own title without rebuilding the pane — a full
+        // display() per keystroke destroys the focused input.
+        const refreshName = () => {
+            const o = settings.stateOverrides[state.char] ?? {};
+            setting.setName(`${o.icon ?? state.icon ?? ''} ${o.label ?? state.label}`.trim());
+        };
+        refreshName();
+
+        this.attachDragHandle(setting, settings);
+
+        setting.addToggle((toggle) => toggle
+            .setValue(isEnabled)
+            .onChange(async (value: boolean) => {
+                if (value) {
+                    if (!settings.enabledStates.includes(state.char)) {
+                        settings.enabledStates = [...settings.enabledStates, state.char];
+                    }
+                } else {
+                    settings.enabledStates = settings.enabledStates.filter((c: string) => c !== state.char);
+                }
+                await this.plugin.saveSettings();
+            }));
+
+        setting.addText((text) => text
+            .setPlaceholder('Custom label')
+            .setValue(override.label ?? '')
+            .onChange(async (value: string) => {
+                settings.stateOverrides[state.char] = {
+                    ...(settings.stateOverrides[state.char] ?? {}),
+                    label: value || undefined,
+                };
+                refreshName();
+                await this.plugin.saveSettings();
+            }));
+
+        setting.addText((text) => text
+            .setPlaceholder('Custom icon')
+            .setValue(override.icon ?? '')
+            .onChange(async (value: string) => {
+                settings.stateOverrides[state.char] = {
+                    ...(settings.stateOverrides[state.char] ?? {}),
+                    icon: value || undefined,
+                };
+                refreshName();
+                await this.plugin.saveSettings();
+            }));
+
+        if (isCustom) {
+            setting.addButton((btn) => btn
+                .setButtonText('Remove')
+                .setWarning()
+                .onClick(async () => {
+                    settings.customStates = settings.customStates.filter((s) => s.char !== state.char);
+                    settings.enabledStates = settings.enabledStates.filter((c: string) => c !== state.char);
+                    settings.stateOrder = settings.stateOrder.filter((c: string) => c !== state.char);
+                    delete settings.stateOverrides[state.char];
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+        }
+    }
+
+    /** Prepend a ⠿ grip to the row and wire up HTML5 drag-and-drop reordering. */
+    private attachDragHandle(setting: Setting, settings: CheckboxPluginSettings): void {
+        const rowEl = setting.settingEl;
+        rowEl.addClass('checkbox-context-menu-state-row');
+
+        const handle = setting.nameEl.createSpan({
+            cls: 'checkbox-context-menu-drag-handle',
+            text: '⠿',
+        });
+        setting.nameEl.prepend(handle);
+
+        // Only the grip arms dragging, so text inputs keep normal selection.
+        handle.addEventListener('mousedown', () => { rowEl.draggable = true; });
+        handle.addEventListener('touchstart', () => { rowEl.draggable = true; });
+
+        rowEl.addEventListener('dragstart', (ev: DragEvent) => {
+            ev.dataTransfer?.setData('text/plain', rowEl.dataset.stateChar ?? '');
+            rowEl.addClass('checkbox-context-menu-dragging');
+        });
+        rowEl.addEventListener('dragend', () => {
+            rowEl.draggable = false;
+            rowEl.removeClass('checkbox-context-menu-dragging');
+            rowEl.parentElement?.querySelectorAll('.checkbox-context-menu-drop-target')
+                .forEach((el) => el.removeClass('checkbox-context-menu-drop-target'));
+        });
+        rowEl.addEventListener('dragover', (ev: DragEvent) => {
+            ev.preventDefault();
+            rowEl.addClass('checkbox-context-menu-drop-target');
+        });
+        rowEl.addEventListener('dragleave', () => {
+            rowEl.removeClass('checkbox-context-menu-drop-target');
+        });
+        rowEl.addEventListener('drop', (ev: DragEvent) => {
+            ev.preventDefault();
+            const draggedChar = ev.dataTransfer?.getData('text/plain');
+            const targetChar = rowEl.dataset.stateChar;
+            if (draggedChar == null || targetChar == null || draggedChar === targetChar) return;
+            void this.moveState(settings, draggedChar, targetChar);
+        });
+    }
+
+    /** Reorder stateOrder so draggedChar takes targetChar's position. */
+    private async moveState(settings: CheckboxPluginSettings, draggedChar: string, targetChar: string): Promise<void> {
+        const order = normalizeStateOrder(settings);
+        const from = order.indexOf(draggedChar);
+        const to = order.indexOf(targetChar);
+        if (from === -1 || to === -1) return;
+
+        order.splice(from, 1);
+        order.splice(to, 0, draggedChar);
+        settings.stateOrder = order;
+
+        await this.plugin.saveSettings();
+        this.display();
     }
 
     addCustomStatesSection(containerEl: HTMLElement, settings: CheckboxPluginSettings): void {
         new Setting(containerEl)
             .setName('Custom states')
-            .setDesc('Add your own checkbox states with a unique character, label, and icon.')
+            .setDesc('Add your own checkbox states with a unique character, label, and icon. They appear in the list above.')
             .setHeading();
-
-        if (settings.customStates.length === 0) {
-            new Setting(containerEl)
-                .setDesc('No custom states defined yet.');
-        }
-
-        settings.customStates.forEach((customState: CheckboxState, index: number) => {
-            const setting = new Setting(containerEl);
-
-            const nameSpan: HTMLSpanElement = setting.controlEl.createSpan();
-            nameSpan.textContent = `${customState.icon ?? '?'} ${customState.label}`;
-            setting.descEl.createSpan().textContent = `Renders as: ${describeChar(customState.char)}`;
-
-            setting.addButton((btn) => btn
-                .setButtonText('Remove')
-                .setWarning()
-                .onClick(async () => {
-                    const newCustom = [...settings.customStates];
-                    newCustom.splice(index, 1);
-                    settings.customStates = newCustom;
-                    settings.enabledStates = settings.enabledStates.filter((c: string) => c !== customState.char);
-                    delete settings.stateOverrides[customState.char];
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-        });
-
-        if (settings.customStates.length > 0) {
-            new Setting(containerEl);
-        }
 
         const formSetting = new Setting(containerEl)
             .setName('Add custom state')
@@ -221,6 +279,7 @@ export class CheckboxPluginSettingTab extends PluginSettingTab {
                         if (!settings.enabledStates.includes(char)) {
                             settings.enabledStates = [...settings.enabledStates, char];
                         }
+                        settings.stateOrder = normalizeStateOrder(settings);
                     }
 
                     await this.plugin.saveSettings();
@@ -228,8 +287,4 @@ export class CheckboxPluginSettingTab extends PluginSettingTab {
                 }));
     }
 
-    getResolvedLabel(state: CheckboxState, settings: CheckboxPluginSettings): string {
-        const override = settings.stateOverrides[state.char];
-        return override?.label ?? state.label;
-    }
 }
