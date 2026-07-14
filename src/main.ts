@@ -1,5 +1,5 @@
 import { Plugin, Editor, Menu, Notice } from 'obsidian';
-import { CheckboxPluginSettings, DEFAULT_SETTINGS, getActiveStates, UNCHECKED_CHAR } from './checkbox-states';
+import { CheckboxPluginSettings, DEFAULT_SETTINGS, getActiveStates, normalizeStateOrder, UNCHECKED_CHAR } from './checkbox-states';
 import { CheckboxPluginSettingTab } from './settings';
 import { findCheckboxOnLine, getCheckboxLineAndColumn, isTaskLine } from './detector';
 import { populateCheckboxSubmenu, replaceCheckbox } from './menu';
@@ -109,8 +109,13 @@ export default class CheckboxContextMenuPlugin extends Plugin {
             this.settings.highlightCurrent = loaded.highlightCurrent ?? DEFAULT_SETTINGS.highlightCurrent;
             this.settings.sortAlphabetically = loaded.sortAlphabetically ?? DEFAULT_SETTINGS.sortAlphabetically;
             this.settings.injectStatusStyles = loaded.injectStatusStyles ?? DEFAULT_SETTINGS.injectStatusStyles;
+            this.settings.stateOrder = loaded.stateOrder ?? DEFAULT_SETTINGS.stateOrder;
             this.migrateEmptyUncheckedChar();
         }
+
+        // Drop removed chars, append newly known ones (also seeds pre-1.1
+        // settings files that have no stateOrder).
+        this.settings.stateOrder = normalizeStateOrder(this.settings);
     }
 
     /**
@@ -120,6 +125,9 @@ export default class CheckboxContextMenuPlugin extends Plugin {
      */
     private migrateEmptyUncheckedChar(): void {
         this.settings.enabledStates = this.settings.enabledStates.map(
+            (c) => (c === '' ? UNCHECKED_CHAR : c),
+        );
+        this.settings.stateOrder = this.settings.stateOrder.map(
             (c) => (c === '' ? UNCHECKED_CHAR : c),
         );
 

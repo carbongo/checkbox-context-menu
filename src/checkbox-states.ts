@@ -26,6 +26,11 @@ export interface CheckboxPluginSettings {
   /** Whether to sort states alphabetically by label. */
   sortAlphabetically: boolean;
   /**
+   * Menu order of state chars (defaults + custom), rearrangeable by drag and
+   * drop in settings. Ignored while sortAlphabetically is on.
+   */
+  stateOrder: string[];
+  /**
    * Whether the plugin injects its per-status checkbox styling (the coloured
    * glyphs from styles.css). On by default; users with their own theme/CSS can
    * turn it off so the plugin doesn't fight their styling.
@@ -59,18 +64,41 @@ export const DEFAULT_SETTINGS: CheckboxPluginSettings = {
   showIcons: true,
   highlightCurrent: true,
   sortAlphabetically: false,
+  stateOrder: DEFAULT_STATES.map(s => s.char),
   injectStatusStyles: true,
 };
 
 /**
+ * Return stateOrder cleaned against the current set of known states: chars of
+ * removed states are dropped, and any known state missing from the order
+ * (new default after an update, freshly added custom state, or a pre-order
+ * settings file) is appended in its natural position.
+ */
+export function normalizeStateOrder(settings: CheckboxPluginSettings): string[] {
+  const known = [...DEFAULT_STATES, ...settings.customStates].map(s => s.char);
+  const order = (settings.stateOrder ?? []).filter(c => known.includes(c));
+  for (const c of known) {
+    if (!order.includes(c)) order.push(c);
+  }
+  return order;
+}
+
+/** All states (default + custom) in the user's configured order. */
+export function getOrderedStates(settings: CheckboxPluginSettings): CheckboxState[] {
+  const byChar = new Map([...DEFAULT_STATES, ...settings.customStates].map(s => [s.char, s]));
+  // normalizeStateOrder only returns chars present in byChar.
+  return normalizeStateOrder(settings)
+    .map(c => byChar.get(c))
+    .filter((s): s is CheckboxState => s !== undefined);
+}
+
+/**
  * Return the merged list of default + custom states that are currently enabled,
- * applying any label/icon overrides. The unchecked state is always first
- * regardless of alphabetical sort setting.
+ * in the user's configured order, applying any label/icon overrides. With
+ * alphabetical sort on, the order is by label instead, unchecked pinned first.
  */
 export function getActiveStates(settings: CheckboxPluginSettings): CheckboxState[] {
-  const allStates = [...DEFAULT_STATES, ...settings.customStates];
-
-  const active = allStates
+  const active = getOrderedStates(settings)
     .filter(s => settings.enabledStates.includes(s.char))
     .map(s => ({
       ...s,
