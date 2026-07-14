@@ -33,9 +33,9 @@ input.task-list-item-checkbox[data-task="/"],
 .task-list-item[data-task="/"] input.task-list-item-checkbox { … }
 ```
 
-Every declaration is `!important` so the default theme's own, more-specific
-checkbox rules can't override the border/glyph in either mode (previously only
-the `!important` background applied in Reading mode, leaving a half-styled box).
+Instead of `!important` (which the marketplace scan flags), every selector
+doubles the gating body class (`body.checkbox-context-menu-styles.checkbox-context-menu-styles`)
+to out-specify Obsidian's built-in checkbox rules in both modes.
 
 For non-`x` states we force `appearance: none`, make the box transparent
 (clearing Obsidian's default background/checkmark), and draw our own glyph with
@@ -56,6 +56,10 @@ Colours use Obsidian's built-in theme variables (`--color-yellow`,
 `--text-faint`, …) so they adapt to light/dark and the active theme.
 
 ## Notes
+
+- The `::after` glyph is centred purely by `inset: 0` + flex centring. An
+  earlier `transform: translate3d(-2px, -2px, 0)` "optical nudge" made every
+  glyph sit visibly up-and-left of centre and was removed in 1.0.2.
 
 - Custom user states get **no** styling here (their char is unknown at build
   time); they still render as Obsidian's default box. The context menu still
