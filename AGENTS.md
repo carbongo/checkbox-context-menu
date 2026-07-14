@@ -6,6 +6,7 @@ Obsidian plugin — right-click context menu to toggle checkbox states.
 
 ```bash
 npm install --legacy-peer-deps && npm run dev
+npm run lint
 npm test
 ```
 
@@ -23,3 +24,4 @@ npm test
 - `unchecked-char-fix.md` — why the unchecked state uses `" "` (not `""`) and the settings migration.
 - `status-styles.md` — the `styles.css` per-status styling and how it hooks the `data-task` attribute.
 - `obsidian-marketplace.md` — how to publish/update on the Obsidian marketplace.
+- `marketplace-scan-fixes.md` — the 71 marketplace scan issues, the CSS !important-free approach, TypeScript fixes, and linting workflow.
