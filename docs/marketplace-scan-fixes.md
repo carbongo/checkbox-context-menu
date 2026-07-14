@@ -69,3 +69,19 @@ These deprecations cannot be fixed without breaking compatibility with Obsidian 
 ## Release workflow
 
 The CI pipeline in `.github/workflows/release.yml` runs `npm run lint` as a pre-build check. Lint must stay at 0 errors before a release can proceed.
+
+## Round 2 (1.1.1)
+
+The post-1.1.0 scan surfaced four more findings, fixed as follows:
+
+- **css-masks partial support** (`mask-image: none` in styles.css) — resolved by
+  bumping `minAppVersion` to 1.13.0, where the feature is fully supported.
+- **`display` deprecated (5 call sites)** — the settings tab's internal
+  re-renders now call a private `render()`; the deprecated `display()` override
+  just delegates to it, leaving no deprecated call sites.
+- **`setWarning` deprecated** — replaced with `setDestructive()` (needs
+  Obsidian 1.13, consistent with the minAppVersion bump).
+- **Missing artifact attestations** — release.yml now runs
+  `actions/attest-build-provenance@v2` over main.js/manifest.json/styles.css
+  (with `id-token: write` + `attestations: write` permissions) before creating
+  the draft release; checkout/setup-node bumped to v4 / Node 20.
