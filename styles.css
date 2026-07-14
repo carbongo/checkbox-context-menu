@@ -17,105 +17,109 @@
      `<li class="task-list-item" data-task="…">`; the input may not carry it.
    So each rule targets the input by its own `data-task` AND by the parent li's
    `data-task`. The earlier input-only selector matched Live Preview but silently
-   missed Reading mode. Everything is `!important` so the default theme's own,
-   more-specific checkbox rules can't override us in either mode.
+   missed Reading mode.
+
+   Specificity note: instead of !important, every selector doubles the
+   body.checkbox-context-menu-styles class (e.g.
+   `body.checkbox-context-menu-styles.checkbox-context-menu-styles`). This raises
+   each rule's specificity above Obsidian's built-in theme selectors without
+   relying on !important.
    ========================================================================== */
 
 /* --- Shared box: take full control for our custom states ------------------ */
 /* `appearance: none` strips the theme's chrome and is what lets ::after render
    on the checkbox input. */
-body.checkbox-context-menu-styles input.task-list-item-checkbox:is(
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox:is(
     [data-task="/"], [data-task=">"], [data-task="<"], [data-task="!"], [data-task="-"]
 ),
-body.checkbox-context-menu-styles .task-list-item:is(
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item:is(
     [data-task="/"], [data-task=">"], [data-task="<"], [data-task="!"], [data-task="-"]
 ) input.task-list-item-checkbox {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    position: relative !important;
-    box-sizing: border-box !important;
-    border: 1px solid var(--text-muted) !important;
-    background: transparent !important;
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    box-sizing: border-box;
+    border: 1px solid var(--text-muted);
+    background: transparent;
 }
 
 /* --- Shared glyph: perfectly centred inside the box ----------------------- */
-body.checkbox-context-menu-styles input.task-list-item-checkbox:is(
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox:is(
     [data-task="/"], [data-task=">"], [data-task="<"], [data-task="!"], [data-task="-"]
 )::after,
-body.checkbox-context-menu-styles .task-list-item:is(
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item:is(
     [data-task="/"], [data-task=">"], [data-task="<"], [data-task="!"], [data-task="-"]
 ) input.task-list-item-checkbox::after {
-    content: "" !important;
-    position: absolute !important;
-    inset: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 0.85em !important;
-    font-weight: 700 !important;
-    font-family: var(--font-text, sans-serif) !important;
-    line-height: 1 !important;
-    text-align: center !important;
+    content: "";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    font-weight: 700;
+    font-family: var(--font-text, sans-serif);
+    line-height: 1;
+    text-align: center;
     /* Nudge the glyph a hair left — several of these characters carry a
        right-heavy side bearing that reads as off-centre otherwise. */
-    transform: translate3d(-2px, -2px, 0) !important;
+    transform: translate3d(-2px, -2px, 0);
     /* Cancel any theme checkmark mask so only our glyph shows. */
-    background: none !important;
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
+    background: none;
+    mask-image: none;
 }
 
 /* --- Half-done — yellow, box filled on the left half ---------------------- */
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="/"],
-body.checkbox-context-menu-styles .task-list-item[data-task="/"] input.task-list-item-checkbox {
-    border-color: var(--color-yellow) !important;
-    background: linear-gradient(90deg, var(--color-yellow) 0 50%, transparent 50% 100%) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="/"],
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="/"] input.task-list-item-checkbox {
+    border-color: var(--color-yellow);
+    background: linear-gradient(90deg, var(--color-yellow) 0 50%, transparent 50% 100%);
 }
 
 /* --- Deferred / forwarded — blue right arrow ------------------------------ */
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task=">"],
-body.checkbox-context-menu-styles .task-list-item[data-task=">"] input.task-list-item-checkbox {
-    border-color: var(--color-blue) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task=">"],
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task=">"] input.task-list-item-checkbox {
+    border-color: var(--color-blue);
 }
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task=">"]::after,
-body.checkbox-context-menu-styles .task-list-item[data-task=">"] input.task-list-item-checkbox::after {
-    content: "→" !important;
-    color: var(--color-blue) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task=">"]::after,
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task=">"] input.task-list-item-checkbox::after {
+    content: "→";
+    color: var(--color-blue);
 }
 
 /* --- Scheduled — orange left arrow ---------------------------------------- */
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="<"],
-body.checkbox-context-menu-styles .task-list-item[data-task="<"] input.task-list-item-checkbox {
-    border-color: var(--color-orange) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="<"],
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="<"] input.task-list-item-checkbox {
+    border-color: var(--color-orange);
 }
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="<"]::after,
-body.checkbox-context-menu-styles .task-list-item[data-task="<"] input.task-list-item-checkbox::after {
-    content: "←" !important;
-    color: var(--color-orange) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="<"]::after,
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="<"] input.task-list-item-checkbox::after {
+    content: "←";
+    color: var(--color-orange);
 }
 
 /* --- Important — red exclamation ------------------------------------------ */
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="!"],
-body.checkbox-context-menu-styles .task-list-item[data-task="!"] input.task-list-item-checkbox {
-    border-color: var(--color-red) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="!"],
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="!"] input.task-list-item-checkbox {
+    border-color: var(--color-red);
 }
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="!"]::after,
-body.checkbox-context-menu-styles .task-list-item[data-task="!"] input.task-list-item-checkbox::after {
-    content: "!" !important;
-    color: var(--color-red) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="!"]::after,
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="!"] input.task-list-item-checkbox::after {
+    content: "!";
+    color: var(--color-red);
 }
 
 /* --- Cancelled — faint dash, plus struck-through, dimmed task text -------- */
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="-"],
-body.checkbox-context-menu-styles .task-list-item[data-task="-"] input.task-list-item-checkbox {
-    border-color: var(--text-faint) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="-"],
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="-"] input.task-list-item-checkbox {
+    border-color: var(--text-faint);
 }
-body.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="-"]::after,
-body.checkbox-context-menu-styles .task-list-item[data-task="-"] input.task-list-item-checkbox::after {
-    content: "–" !important;
-    color: var(--text-faint) !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles input.task-list-item-checkbox[data-task="-"]::after,
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="-"] input.task-list-item-checkbox::after {
+    content: "–";
+    color: var(--text-faint);
 }
-body.checkbox-context-menu-styles .task-list-item[data-task="-"] {
-    color: var(--text-faint) !important;
-    text-decoration: line-through !important;
+body.checkbox-context-menu-styles.checkbox-context-menu-styles .task-list-item[data-task="-"] {
+    color: var(--text-faint);
+    text-decoration: line-through;
 }
